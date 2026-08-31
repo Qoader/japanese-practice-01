@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import seed from '../data/sentences.json';
 import './style.css';
+import { exerciseGuidance } from './exerciseGuidance';
 import {
   normalizeAnswer,
   normalizeReading,
@@ -352,8 +353,12 @@ function Lesson({
   }
   return (
     <main className="lesson">
-      <p>
-        Card {i + 1} of {cards.length} · {card.type}
+      <p className="lesson-progress">
+        Card {i + 1} of {cards.length}
+      </p>
+      <p className="lesson-type">{exerciseGuidance[card.type].label}</p>
+      <p className="lesson-instruction">
+        {exerciseGuidance[card.type].instruction}
       </p>
       <h1>
         {card.type === 'translation'

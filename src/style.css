@@ -101,6 +101,23 @@ article span {
   flex: 1 1 10rem;
   margin: 0;
 }
+.lesson-progress,
+.lesson-type,
+.lesson-instruction {
+  margin: 0;
+}
+.lesson-progress {
+  color: #685e56;
+  font-size: 0.9rem;
+}
+.lesson-type {
+  color: #9f2e1d;
+  font-weight: 700;
+  font-size: 1.15rem;
+}
+.lesson-instruction {
+  color: #685e56;
+}
 .vocabulary-list {
   display: flex;
   flex-direction: column;
@@ -121,7 +138,10 @@ article span {
   font-weight: 700;
 }
 .target {
-  font-size: 1.15rem;
+  text-decoration-line: underline;
+  text-decoration-color: #9f2e1d;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 0.18em;
 }
 .correct,
 .incorrect {
