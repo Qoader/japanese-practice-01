@@ -749,7 +749,51 @@ function Sync({
   );
 }
 function Settings() {
-  let [t, st] = useState(localStorage.getItem('github-token') || '');
+  let [t, st] = useState(''),
+    [hasToken, setHasToken] = useState(() => {
+      try {
+        return Boolean(localStorage.getItem('github-token'));
+      } catch {
+        return false;
+      }
+    }),
+    [status, setStatus] = useState<{
+      type: 'success' | 'error';
+      text: string;
+    }>();
+  function saveToken() {
+    try {
+      if (!t) {
+        localStorage.removeItem('github-token');
+        setHasToken(false);
+        st('');
+        setStatus({ type: 'success', text: 'Token cleared.' });
+        return;
+      }
+      localStorage.setItem('github-token', t);
+      setHasToken(true);
+      st('');
+      setStatus({ type: 'success', text: 'Token saved.' });
+    } catch {
+      setStatus({
+        type: 'error',
+        text: 'Unable to save the token in this browser. Your token was not changed.',
+      });
+    }
+  }
+  function clearToken() {
+    try {
+      localStorage.removeItem('github-token');
+      setHasToken(false);
+      st('');
+      setStatus({ type: 'success', text: 'Token cleared.' });
+    } catch {
+      setStatus({
+        type: 'error',
+        text: 'Unable to clear the token in this browser. Your token was not changed.',
+      });
+    }
+  }
   return (
     <main>
       <h1>Settings</h1>
@@ -757,22 +801,33 @@ function Settings() {
         Shared-device warning: this browser can access your token and queued
         work.
       </p>
-      <input
-        type="password"
-        value={t}
-        onChange={(e) => {
-          st(e.target.value);
-          localStorage.setItem('github-token', e.target.value);
-        }}
-      />
-      <button
-        onClick={() => {
-          localStorage.removeItem('github-token');
-          st('');
-        }}
-      >
-        Disconnect
+      <p>
+        {hasToken ? 'GitHub token configured.' : 'No GitHub token configured.'}
+      </p>
+      <label>
+        GitHub token
+        <input
+          type="password"
+          value={t}
+          autoComplete="new-password"
+          onChange={(e) => {
+            st(e.target.value);
+            setStatus(undefined);
+          }}
+        />
+      </label>
+      <button disabled={!t} onClick={saveToken}>
+        Save token
       </button>
+      <button onClick={clearToken}>Clear token</button>
+      {status && (
+        <p
+          role={status.type === 'error' ? 'alert' : 'status'}
+          aria-live="polite"
+        >
+          {status.text}
+        </p>
+      )}
       <p>Queued work is preserved.</p>
       <button
         onClick={async () => {
