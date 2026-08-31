@@ -65,6 +65,9 @@ input:focus-visible {
   outline: 3px solid #e4a92d;
   outline-offset: 3px;
 }
+input[type='search'] {
+  font-size: max(16px, 1rem);
+}
 article {
   display: flex;
   flex-direction: column;
@@ -86,6 +89,32 @@ article span {
   border-radius: 0.7rem;
   background: white;
   margin: 1rem 0;
+}
+.lesson-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+  margin: 0.5rem 0;
+}
+.lesson-actions button {
+  flex: 1 1 10rem;
+  margin: 0;
+}
+.vocabulary-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+.vocabulary-list label {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  width: 100%;
+}
+.vocabulary-list input {
+  flex: 0 0 auto;
+  margin-top: 0.25rem;
 }
 .eyebrow {
   color: #9f2e1d;

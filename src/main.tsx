@@ -214,6 +214,7 @@ function Lesson({
     [hydrated, setHydrated] = useState(false),
     [ans, sa] = useState(''),
     [done, sd] = useState(false),
+    [translationResolved, setTranslationResolved] = useState(false),
     cardIndex =
       retryQueue[0] && retryQueue[0].dueAt <= i
         ? retryQueue[0].cardIndex
@@ -327,6 +328,27 @@ function Lesson({
       patch: { text: z.text },
     });
     await rec(true, true);
+    setTranslationResolved(true);
+  }
+  async function dontKnow() {
+    await rec(false);
+    setTranslationResolved(true);
+  }
+  function nextCard() {
+    const nextPosition = i + 1;
+    si(nextPosition);
+    const nextRetry = retryQueue
+      .filter((x) => x.cardIndex !== cardIndex)
+      .find((x) => x.dueAt <= nextPosition);
+    const next = nextRetry
+      ? cards[nextRetry.cardIndex]
+      : chooseCard(cards, p, [activeCard.id, ...recent]);
+    if (next) setSelectedIndex(cards.findIndex((c) => c.id === next.id));
+    sa('');
+    sd(false);
+    setTranslationResolved(false);
+    if (nextPosition >= cards.length && retryQueue.length === 0)
+      void clearLesson();
   }
   return (
     <main className="lesson">
@@ -361,16 +383,33 @@ function Lesson({
             void rec(ok);
         }}
       />
-      <button
-        className="primary"
-        onClick={() => {
-          if (card.type === 'translation' && !ok) sd(true);
-          else void rec(ok);
-        }}
-        disabled={done}
-      >
-        Check
-      </button>
+      <div className="lesson-actions">
+        {!done && (
+          <button
+            className="primary"
+            onClick={() => {
+              if (card.type === 'translation' && !ok) sd(true);
+              else void rec(ok);
+            }}
+          >
+            Check
+          </button>
+        )}
+        {done && (ok || card.type !== 'translation' || translationResolved) && (
+          <button className="primary" onClick={nextCard}>
+            Next
+          </button>
+        )}
+        <button
+          className="stop"
+          onClick={() => {
+            void clearLesson();
+            location.hash = '#/';
+          }}
+        >
+          Stop lesson
+        </button>
+      </div>
       {done && (
         <section>
           <h2>{ok ? 'Correct' : 'Not quite'}</h2>
@@ -399,42 +438,11 @@ function Lesson({
               <button onClick={() => void also()}>
                 My answer is also correct
               </button>
-              <button onClick={() => void rec(false)}>I don't know</button>
+              <button onClick={() => void dontKnow()}>I don't know</button>
             </>
-          )}
-          {(ok || card.type !== 'translation') && (
-            <button
-              onClick={() => {
-                const nextPosition = i + 1;
-                si(nextPosition);
-                const nextRetry = retryQueue
-                  .filter((x) => x.cardIndex !== cardIndex)
-                  .find((x) => x.dueAt <= nextPosition);
-                const next = nextRetry
-                  ? cards[nextRetry.cardIndex]
-                  : chooseCard(cards, p, [activeCard.id, ...recent]);
-                if (next)
-                  setSelectedIndex(cards.findIndex((c) => c.id === next.id));
-                sa('');
-                sd(false);
-                if (nextPosition >= cards.length && retryQueue.length === 0)
-                  void clearLesson();
-              }}
-            >
-              Next
-            </button>
           )}
         </section>
       )}
-      <button
-        className="stop"
-        onClick={() => {
-          void clearLesson();
-          location.hash = '#/';
-        }}
-      >
-        Stop lesson
-      </button>
     </main>
   );
 }
@@ -458,6 +466,7 @@ function Setup({ s }: { s: SentenceRecord[] }) {
     <main>
       <h1>Lesson setup</h1>
       <input
+        type="search"
         placeholder="Search"
         value={q}
         onChange={(e) => sq(e.target.value)}
