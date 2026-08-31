@@ -1,0 +1,131 @@
+:root {
+  font-family: system-ui, 'Hiragino Kaku Gothic ProN', sans-serif;
+  color: #29231f;
+  background: #f8f1e7;
+  line-height: 1.5;
+}
+* {
+  box-sizing: border-box;
+}
+body {
+  margin: 0;
+}
+header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem max(1rem, env(safe-area-inset-left));
+  border-bottom: 1px solid #ddcfc0;
+  background: #fffaf3;
+}
+.brand {
+  font-weight: 700;
+  color: #9f2e1d;
+  text-decoration: none;
+}
+.status {
+  font-size: 0.8rem;
+  color: #5f6c55;
+}
+main {
+  max-width: 44rem;
+  margin: auto;
+  padding: 2rem 1rem 7rem;
+}
+h1 {
+  font-size: clamp(1.8rem, 7vw, 3rem);
+  line-height: 1.2;
+}
+h2 {
+  margin-top: 2rem;
+}
+a,
+button {
+  min-height: 44px;
+}
+button,
+.primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 0;
+  border-radius: 999px;
+  padding: 0.7rem 1.2rem;
+  background: #a93422;
+  color: white;
+  font: inherit;
+  text-decoration: none;
+  cursor: pointer;
+  margin: 0.5rem 0;
+}
+.primary:focus-visible,
+button:focus-visible,
+a:focus-visible,
+input:focus-visible {
+  outline: 3px solid #e4a92d;
+  outline-offset: 3px;
+}
+article {
+  display: flex;
+  flex-direction: column;
+  padding: 1rem;
+  margin: 0.7rem 0;
+  background: #fffaf3;
+  border: 1px solid #ddcfc0;
+  border-radius: 1rem;
+}
+article span {
+  color: #685e56;
+}
+.lesson input {
+  display: block;
+  width: 100%;
+  font: inherit;
+  padding: 0.9rem;
+  border: 1px solid #bba99a;
+  border-radius: 0.7rem;
+  background: white;
+  margin: 1rem 0;
+}
+.eyebrow {
+  color: #9f2e1d;
+  font-weight: 700;
+}
+.target {
+  font-size: 1.15rem;
+}
+.correct,
+.incorrect {
+  padding: 1rem;
+  border-radius: 1rem;
+  margin-top: 1rem;
+}
+.correct {
+  background: #e1f2e3;
+}
+.incorrect {
+  background: #f9dedd;
+}
+nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  justify-content: space-around;
+  padding: 0.75rem 0.3rem calc(0.75rem + env(safe-area-inset-bottom));
+  background: #fffaf3;
+  border-top: 1px solid #ddcfc0;
+}
+nav a {
+  color: #29231f;
+  text-decoration: none;
+  font-size: 0.8rem;
+  padding: 0.4rem;
+}
+@media (prefers-reduced-motion: reduce) {
+  * {
+    scroll-behavior: auto !important;
+    transition: none !important;
+  }
+}
