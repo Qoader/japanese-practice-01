@@ -85,16 +85,19 @@ export function reviseSentence(
   const oldWords = previous.segments.filter(
     (s): s is Extract<SentenceSegment, { kind: 'word' }> => s.kind === 'word',
   );
+  const used = new Set<string>();
   const next = normalizeSegments(segments).map((part) => {
     if (part.kind !== 'word') return part;
     const same = oldWords.find(
       (w) =>
+        !used.has(w.id) &&
         w.surface === part.surface &&
         w.reading === normalizeReading(part.reading),
     );
+    if (same) used.add(same.id);
     return same
       ? { ...part, id: same.id, revision: same.revision }
-      : { ...part, reading: normalizeReading(part.reading), revision: 1 };
+      : { ...part, id: crypto.randomUUID(), reading: normalizeReading(part.reading), revision: 1 };
   });
   const changedTranslation =
     previous.english !== english || previous.japanese !== japanese;
@@ -243,6 +246,49 @@ export function suggestedWordSpans(value: string) {
       surface: clusters.slice(start).join(''),
     });
   return spans;
+}
+
+export type AuthorWord = {
+  id: string;
+  start: number;
+  end: number;
+  surface: string;
+  reading: string;
+  selected: boolean;
+};
+
+/** Build sentence segments from grapheme-indexed author selections. */
+export function segmentsFromAuthorWords(
+  japanese: string,
+  words: AuthorWord[],
+): SentenceSegment[] {
+  const clusters = graphemeClusters(japanese), sorted = [...words]
+    .filter((w) => w.selected)
+    .sort((a, b) => a.start - b.start);
+  const out: SentenceSegment[] = [];
+  let pos = 0;
+  for (const w of sorted) {
+    if (w.start < pos || w.start < 0 || w.end > clusters.length || w.end <= w.start)
+      continue;
+    if (w.start > pos) out.push({ kind: 'text', text: clusters.slice(pos, w.start).join('') });
+    out.push({ kind: 'word', id: w.id || crypto.randomUUID(), revision: 1, surface: clusters.slice(w.start, w.end).join(''), reading: normalizeReading(w.reading) });
+    pos = w.end;
+  }
+  if (pos < clusters.length) out.push({ kind: 'text', text: clusters.slice(pos).join('') });
+  return normalizeSegments(out);
+}
+
+export function validateAuthorWords(japanese: string, words: AuthorWord[], requireReadings = true) {
+  const clusters = graphemeClusters(japanese), errors: string[] = [], ranges: Array<[number, number]> = [];
+  for (const w of words.filter((x) => x.selected)) {
+    const surface = clusters.slice(w.start, w.end).join('');
+    if (!surface || surface !== w.surface) errors.push(`${w.surface || 'Word'} is not an exact sentence span`);
+    if (!/\p{Script=Han}/u.test(surface)) errors.push(`${surface || 'Word'} must contain kanji`);
+    if (ranges.some(([a, b]) => w.start < b && w.end > a)) errors.push(`${surface} overlaps another word`);
+    ranges.push([w.start, w.end]);
+    if (requireReadings && !normalizeReading(w.reading)) errors.push(`${surface} needs a reading`);
+  }
+  return errors;
 }
 export function cardsForLesson(
   sentences: SentenceRecord[],

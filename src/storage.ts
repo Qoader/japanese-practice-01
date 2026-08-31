@@ -47,6 +47,9 @@ export async function saveVariant(v: PersonalVariant) {
 export async function deleteVariant(id: string) {
   return (await db).delete('variants', id);
 }
+export async function deleteProgress(cardId: string) {
+  return (await db).delete('progress', cardId);
+}
 export async function saveLesson(v: ActiveLessonState) {
   return (await db).put('lesson', { ...v, id: 'active' });
 }

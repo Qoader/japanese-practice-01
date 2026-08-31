@@ -65,7 +65,7 @@ input:focus-visible {
   outline: 3px solid #e4a92d;
   outline-offset: 3px;
 }
-input[type='search'] {
+input:not([type='checkbox']):not([type='file']) {
   font-size: max(16px, 1rem);
 }
 article {
