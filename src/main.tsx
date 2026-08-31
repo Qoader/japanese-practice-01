@@ -136,7 +136,12 @@ function App() {
           d={d}
           put={put}
           add={add}
-          p={p} setP={setP} v={v} setV={setV} q={q} setQ={setQ}
+          p={p}
+          setP={setP}
+          v={v}
+          setV={setV}
+          q={q}
+          setQ={setQ}
           existing={d.sentences.find((x) => r === `#/sentences/edit/${x.id}`)}
         />
       ) : r === '#/sync' ? (
@@ -608,62 +613,174 @@ function Author({
   const initialWords = (): AuthorWord[] => {
     const spans = suggestedWordSpans(existing?.japanese || '');
     if (!existing) return [];
-    const clusters = graphemeClusters(existing.japanese), out: AuthorWord[] = [];
+    const clusters = graphemeClusters(existing.japanese),
+      out: AuthorWord[] = [];
     let pos = 0;
     for (const part of existing.segments) {
-      const n = graphemeClusters(part.kind === 'text' ? part.text : part.surface).length;
-      if (part.kind === 'word') out.push({ id: part.id, start: pos, end: pos + n, surface: part.surface, reading: part.reading, selected: true });
+      const n = graphemeClusters(
+        part.kind === 'text' ? part.text : part.surface,
+      ).length;
+      if (part.kind === 'word')
+        out.push({
+          id: part.id,
+          start: pos,
+          end: pos + n,
+          surface: part.surface,
+          reading: part.reading,
+          selected: true,
+        });
       pos += n;
     }
-    return out.length ? out : spans.map((x) => ({ ...x, id: crypto.randomUUID(), reading: '', selected: true }));
+    return out.length
+      ? out
+      : spans.map((x) => ({
+          ...x,
+          id: crypto.randomUUID(),
+          reading: '',
+          selected: true,
+        }));
   };
-  let [j, sj] = useState(existing?.japanese || ''), [e, se] = useState(existing?.english || ''),
-    [step, setStep] = useState(0), [words, setWords] = useState<AuthorWord[]>(initialWords),
-    [error, setError] = useState(''), [addWord, setAddWord] = useState(''),
-    [pendingEdit, setPendingEdit] = useState<{ index: number; surface: string; starts: number[] }>();
-  const selected = words.filter((w) => w.selected).sort((a, b) => a.start - b.start);
+  let [j, sj] = useState(existing?.japanese || ''),
+    [e, se] = useState(existing?.english || ''),
+    [step, setStep] = useState(0),
+    [words, setWords] = useState<AuthorWord[]>(initialWords),
+    [error, setError] = useState(''),
+    [addWord, setAddWord] = useState(''),
+    [pendingEdit, setPendingEdit] = useState<{
+      index: number;
+      surface: string;
+      starts: number[];
+    }>();
+  const selected = words
+    .filter((w) => w.selected)
+    .sort((a, b) => a.start - b.start);
   function next() {
     setError('');
-    if (step === 0 && !j.trim()) return setError('Japanese sentence is required');
+    if (step === 0 && !j.trim())
+      return setError('Japanese sentence is required');
     if (step === 0) {
-      const normalized = j.trim(), spans = suggestedWordSpans(normalized);
+      const normalized = j.trim(),
+        spans = suggestedWordSpans(normalized);
       if (normalized !== j) sj(normalized);
-      if (normalized !== (existing?.japanese || '')) setWords(spans.map((x) => ({ ...x, id: crypto.randomUUID(), reading: '', selected: true })));
+      if (normalized !== (existing?.japanese || ''))
+        setWords(
+          spans.map((x) => ({
+            ...x,
+            id: crypto.randomUUID(),
+            reading: '',
+            selected: true,
+          })),
+        );
     }
-    if (step === 1) { const errors = validateAuthorWords(j, words, false); if (errors.length) return setError(errors[0]); }
-    if (step >= 2 && step < 2 + selected.length && !normalizeReading(selected[step - 2].reading)) return setError('Enter a reading before continuing');
-    if (step === 2 + selected.length && !e.trim()) return setError('English translation is required');
+    if (step === 1) {
+      const errors = validateAuthorWords(j, words, false);
+      if (errors.length) return setError(errors[0]);
+    }
+    if (
+      step >= 2 &&
+      step < 2 + selected.length &&
+      !normalizeReading(selected[step - 2].reading)
+    )
+      return setError('Enter a reading before continuing');
+    if (step === 2 + selected.length && !e.trim())
+      return setError('English translation is required');
     setStep((x) => Math.min(x + 1, 3 + selected.length));
   }
-  function back() { setError(''); setStep((x) => Math.max(0, x - 1)); }
+  function back() {
+    setError('');
+    setStep((x) => Math.max(0, x - 1));
+  }
   function remapWord(index: number, surface: string, occurrence = 0) {
-    const text = graphemeClusters(j.trim()).join(''), starts: number[] = [];
+    const text = graphemeClusters(j.trim()).join(''),
+      starts: number[] = [];
     if (!surface) return;
-    let from = 0, at;
-    while ((at = text.indexOf(surface, from)) >= 0) { starts.push(at); from = at + 1; }
-    if (!starts.length) { setWords((xs) => xs.map((w, n) => n === index ? { ...w, surface } : w)); setPendingEdit(undefined); return; }
-    const charAt = starts[occurrence], start = graphemeClusters(text.slice(0, charAt)).length;
-    setWords((xs) => xs.map((w, n) => n === index ? { ...w, surface, start, end: start + graphemeClusters(surface).length } : w));
+    let from = 0,
+      at;
+    while ((at = text.indexOf(surface, from)) >= 0) {
+      starts.push(at);
+      from = at + 1;
+    }
+    if (!starts.length) {
+      setWords((xs) => xs.map((w, n) => (n === index ? { ...w, surface } : w)));
+      setPendingEdit(undefined);
+      return;
+    }
+    const charAt = starts[occurrence],
+      start = graphemeClusters(text.slice(0, charAt)).length;
+    setWords((xs) =>
+      xs.map((w, n) =>
+        n === index
+          ? {
+              ...w,
+              surface,
+              start,
+              end: start + graphemeClusters(surface).length,
+            }
+          : w,
+      ),
+    );
     setPendingEdit(undefined);
   }
   async function save() {
-    const japanese = j.trim(), english = e.trim(), seg = segmentsFromAuthorWords(japanese, words);
-    if (!japanese || !english || validateAuthorWords(japanese, words).length) return;
-    if (d.sentences.some((s) => s.id !== existing?.id && s.status === 'active' && normalizeAnswer(s.japanese) === normalizeAnswer(japanese)) && !window.confirm('An active sentence has the same Japanese text. Save duplicate?')) return;
+    const japanese = j.trim(),
+      english = e.trim(),
+      seg = segmentsFromAuthorWords(japanese, words);
+    if (!japanese || !english || validateAuthorWords(japanese, words).length)
+      return;
+    if (
+      d.sentences.some(
+        (s) =>
+          s.id !== existing?.id &&
+          s.status === 'active' &&
+          normalizeAnswer(s.japanese) === normalizeAnswer(japanese),
+      ) &&
+      !window.confirm(
+        'An active sentence has the same Japanese text. Save duplicate?',
+      )
+    )
+      return;
     const t = now();
-    let x: SentenceRecord = existing ? reviseSentence(existing, japanese, english, seg) : { id: crypto.randomUUID(), japanese, english, segments: seg, acceptedJapanese: [], translationRevision: 1, status: 'active', createdAt: t, updatedAt: t };
-    if (existing && (existing.japanese !== japanese || existing.english !== english)) {
+    let x: SentenceRecord = existing
+      ? reviseSentence(existing, japanese, english, seg)
+      : {
+          id: crypto.randomUUID(),
+          japanese,
+          english,
+          segments: seg,
+          acceptedJapanese: [],
+          translationRevision: 1,
+          status: 'active',
+          createdAt: t,
+          updatedAt: t,
+        };
+    if (
+      existing &&
+      (existing.japanese !== japanese || existing.english !== english)
+    ) {
       x = { ...x, acceptedJapanese: [] };
       const valid = new Set(cardsForSentence(x).map((card) => card.id));
-      const removed = Object.keys(p).filter((id) => id.startsWith(`${existing.id}:`) && !valid.has(id));
+      const removed = Object.keys(p).filter(
+        (id) => id.startsWith(`${existing.id}:`) && !valid.has(id),
+      );
       await Promise.all(removed.map(deleteProgress));
-      if (removed.length) setP((old) => { const next = { ...old }; removed.forEach((id) => delete next[id]); return next; });
+      if (removed.length)
+        setP((old) => {
+          const next = { ...old };
+          removed.forEach((id) => delete next[id]);
+          return next;
+        });
       const variants = v.filter((item) => item.sentenceId === existing.id);
       await Promise.all(variants.map((item) => deleteVariant(item.id)));
       setV((old) => old.filter((item) => item.sentenceId !== existing.id));
-      const stale = q.filter((item) => item.sentenceId === existing.id && item.type === 'variant-add');
+      const stale = q.filter(
+        (item) =>
+          item.sentenceId === existing.id && item.type === 'variant-add',
+      );
       await Promise.all(stale.map((item) => deletePending(item.id)));
-      if (stale.length) setQ((old) => old.filter((item) => !stale.some((s) => s.id === item.id)));
+      if (stale.length)
+        setQ((old) =>
+          old.filter((item) => !stale.some((s) => s.id === item.id)),
+        );
     }
     put({
       ...d,
@@ -689,33 +806,208 @@ function Author({
     });
     location.hash = '#/sentences';
   }
-  const labels = ['Japanese', 'Practice words', ...selected.map((w) => `Reading: ${w.surface}`), 'English', 'Review'];
+  const labels = [
+    'Japanese',
+    'Practice words',
+    ...selected.map((w) => `Reading: ${w.surface}`),
+    'English',
+    'Review',
+  ];
   const review = step === labels.length - 1;
   return (
     <main>
-      <p className="eyebrow">Step {step + 1} of {labels.length}: {labels[step]}</p>
+      <p className="eyebrow">
+        Step {step + 1} of {labels.length}: {labels[step]}
+      </p>
       <h1>{review ? 'Review sentence' : labels[step]}</h1>
-      {step === 0 && <label>Japanese<input lang="ja" value={j} onChange={(x) => { sj(x.target.value); if (x.target.value.trim() !== (existing?.japanese || '')) setWords([]); }} /></label>}
-      {step === 1 && <>
-        <p className="sentence-preview">{j}</p>
-        {words.map((w, i) => <label key={w.id}><input type="checkbox" checked={w.selected} onChange={() => setWords((xs) => xs.map((x, n) => n === i ? { ...x, selected: !x.selected } : x))} /> <input lang="ja" aria-label={`Word ${i + 1}`} value={w.surface} onChange={(x) => { const surface = x.target.value, text = graphemeClusters(j.trim()).join(''), starts: number[] = []; let from = 0, at; while ((at = text.indexOf(surface, from)) >= 0) { starts.push(at); from = at + 1; } if (starts.length === 1) remapWord(i, surface); else setPendingEdit({ index: i, surface, starts }); }} /> ({w.start + 1}–{w.end})
-          {pendingEdit?.index === i && pendingEdit.starts.length > 1 && <span>Choose occurrence: {pendingEdit.starts.map((_, n) => <button type="button" key={n} onClick={() => remapWord(i, pendingEdit.surface, n)}>Occurrence {n + 1}</button>)}</span>}
-        </label>)}
-        <label>Add word occurrence<input lang="ja" value={addWord} onChange={(x) => setAddWord(x.target.value)} /></label>
-        {addWord && graphemeClusters(j).join('').split(addWord).length > 1 && <p>Choose an occurrence:</p>}
-        {addWord && Array.from({ length: Math.max(0, graphemeClusters(j).join('').split(addWord).length - 1) }, (_, occurrence) => <button key={occurrence} onClick={() => { const text = graphemeClusters(j).join(''), starts: number[] = []; let from = 0, at; while ((at = text.indexOf(addWord, from)) >= 0) { starts.push(at); from = at + 1; } const charAt = starts[occurrence], start = graphemeClusters(text.slice(0, charAt)).length, end = start + graphemeClusters(addWord).length; if (words.some((w) => w.start === start && w.end === end)) return setError('That occurrence is already selected'); setWords((xs) => [...xs, { id: crypto.randomUUID(), start, end, surface: addWord, reading: '', selected: true }]); setAddWord(''); }}>Occurrence {occurrence + 1}</button>)}
-        {addWord && !graphemeClusters(j).join('').includes(addWord) && <p role="alert">No exact occurrence found in this sentence.</p>}
-      </>}
-      {step >= 2 && step < 2 + selected.length && <label lang="ja">{selected[step - 2].surface}<input value={selected[step - 2].reading} onChange={(x) => setWords((xs) => xs.map((w) => w.id === selected[step - 2].id ? { ...w, reading: x.target.value } : w))} /></label>}
-      {step === 2 + selected.length && <label>English<input value={e} onChange={(x) => se(x.target.value)} /></label>}
-      {review && <>
-        <p><strong>Japanese:</strong> {j} <button onClick={() => setStep(0)}>Edit</button></p>
-        <p><strong>Practice words:</strong> {selected.map((w) => w.surface).join(', ') || 'None'} <button onClick={() => setStep(1)}>Edit</button></p>
-        {selected.map((w, i) => <p key={w.id}><strong>{w.surface}</strong> — {normalizeReading(w.reading)} <button onClick={() => setStep(2 + i)}>Edit</button></p>)}
-        <p><strong>English:</strong> {e} <button onClick={() => setStep(2 + selected.length)}>Edit</button></p>
-      </>}
-      {error && <p role="alert" className="incorrect">{error}</p>}
-      <div className="lesson-actions">{step > 0 && <button onClick={back}>Back</button>}{review ? <button className="primary" onClick={() => void save()}>Save locally</button> : <button className="primary" onClick={next}>Next</button>}</div>
+      {step === 0 && (
+        <label>
+          Japanese
+          <input
+            lang="ja"
+            value={j}
+            onChange={(x) => {
+              sj(x.target.value);
+              if (x.target.value.trim() !== (existing?.japanese || ''))
+                setWords([]);
+            }}
+          />
+        </label>
+      )}
+      {step === 1 && (
+        <>
+          <p className="sentence-preview">{j}</p>
+          {words.map((w, i) => (
+            <label key={w.id}>
+              <input
+                type="checkbox"
+                checked={w.selected}
+                onChange={() =>
+                  setWords((xs) =>
+                    xs.map((x, n) =>
+                      n === i ? { ...x, selected: !x.selected } : x,
+                    ),
+                  )
+                }
+              />{' '}
+              <input
+                lang="ja"
+                aria-label={`Word ${i + 1}`}
+                value={w.surface}
+                onChange={(x) => {
+                  const surface = x.target.value,
+                    text = graphemeClusters(j.trim()).join(''),
+                    starts: number[] = [];
+                  let from = 0,
+                    at;
+                  while ((at = text.indexOf(surface, from)) >= 0) {
+                    starts.push(at);
+                    from = at + 1;
+                  }
+                  if (starts.length === 1) remapWord(i, surface);
+                  else setPendingEdit({ index: i, surface, starts });
+                }}
+              />{' '}
+              ({w.start + 1}–{w.end})
+              {pendingEdit?.index === i && pendingEdit.starts.length > 1 && (
+                <span>
+                  Choose occurrence:{' '}
+                  {pendingEdit.starts.map((_, n) => (
+                    <button
+                      type="button"
+                      key={n}
+                      onClick={() => remapWord(i, pendingEdit.surface, n)}
+                    >
+                      Occurrence {n + 1}
+                    </button>
+                  ))}
+                </span>
+              )}
+            </label>
+          ))}
+          <label>
+            Add word occurrence
+            <input
+              lang="ja"
+              value={addWord}
+              onChange={(x) => setAddWord(x.target.value)}
+            />
+          </label>
+          {addWord &&
+            graphemeClusters(j).join('').split(addWord).length > 1 && (
+              <p>Choose an occurrence:</p>
+            )}
+          {addWord &&
+            Array.from(
+              {
+                length: Math.max(
+                  0,
+                  graphemeClusters(j).join('').split(addWord).length - 1,
+                ),
+              },
+              (_, occurrence) => (
+                <button
+                  key={occurrence}
+                  onClick={() => {
+                    const text = graphemeClusters(j).join(''),
+                      starts: number[] = [];
+                    let from = 0,
+                      at;
+                    while ((at = text.indexOf(addWord, from)) >= 0) {
+                      starts.push(at);
+                      from = at + 1;
+                    }
+                    const charAt = starts[occurrence],
+                      start = graphemeClusters(text.slice(0, charAt)).length,
+                      end = start + graphemeClusters(addWord).length;
+                    if (words.some((w) => w.start === start && w.end === end))
+                      return setError('That occurrence is already selected');
+                    setWords((xs) => [
+                      ...xs,
+                      {
+                        id: crypto.randomUUID(),
+                        start,
+                        end,
+                        surface: addWord,
+                        reading: '',
+                        selected: true,
+                      },
+                    ]);
+                    setAddWord('');
+                  }}
+                >
+                  Occurrence {occurrence + 1}
+                </button>
+              ),
+            )}
+          {addWord && !graphemeClusters(j).join('').includes(addWord) && (
+            <p role="alert">No exact occurrence found in this sentence.</p>
+          )}
+        </>
+      )}
+      {step >= 2 && step < 2 + selected.length && (
+        <label lang="ja">
+          {selected[step - 2].surface}
+          <input
+            value={selected[step - 2].reading}
+            onChange={(x) =>
+              setWords((xs) =>
+                xs.map((w) =>
+                  w.id === selected[step - 2].id
+                    ? { ...w, reading: x.target.value }
+                    : w,
+                ),
+              )
+            }
+          />
+        </label>
+      )}
+      {step === 2 + selected.length && (
+        <label>
+          English
+          <input value={e} onChange={(x) => se(x.target.value)} />
+        </label>
+      )}
+      {review && (
+        <>
+          <p>
+            <strong>Japanese:</strong> {j}{' '}
+            <button onClick={() => setStep(0)}>Edit</button>
+          </p>
+          <p>
+            <strong>Practice words:</strong>{' '}
+            {selected.map((w) => w.surface).join(', ') || 'None'}{' '}
+            <button onClick={() => setStep(1)}>Edit</button>
+          </p>
+          {selected.map((w, i) => (
+            <p key={w.id}>
+              <strong>{w.surface}</strong> — {normalizeReading(w.reading)}{' '}
+              <button onClick={() => setStep(2 + i)}>Edit</button>
+            </p>
+          ))}
+          <p>
+            <strong>English:</strong> {e}{' '}
+            <button onClick={() => setStep(2 + selected.length)}>Edit</button>
+          </p>
+        </>
+      )}
+      {error && (
+        <p role="alert" className="incorrect">
+          {error}
+        </p>
+      )}
+      <div className="lesson-actions">
+        {step > 0 && <button onClick={back}>Back</button>}
+        {review ? (
+          <button className="primary" onClick={() => void save()}>
+            Save locally
+          </button>
+        ) : (
+          <button className="primary" onClick={next}>
+            Next
+          </button>
+        )}
+      </div>
     </main>
   );
 }
