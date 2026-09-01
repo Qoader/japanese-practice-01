@@ -137,6 +137,89 @@
       "status": "active",
       "createdAt": "2026-09-01T05:51:39.243Z",
       "updatedAt": "2026-09-01T05:51:39.243Z"
+    },
+    {
+      "id": "d1d07ef7-e959-46c1-aaa6-e72478707544",
+      "japanese": "テレビで見たことはあるが直接本人に会ったことはない。",
+      "english": "I have seen him on TV but not in the flesh.",
+      "segments": [
+        {
+          "kind": "text",
+          "text": "テレビで見たことはあるが"
+        },
+        {
+          "kind": "word",
+          "id": "5074af89-3587-472c-b04a-8b5b7348ad83",
+          "revision": 1,
+          "surface": "直接",
+          "reading": "ちょくせつ"
+        },
+        {
+          "kind": "word",
+          "id": "ee74481f-4e24-41fc-8c9c-3a137f07bd13",
+          "revision": 1,
+          "surface": "本人",
+          "reading": "ほんにん"
+        },
+        {
+          "kind": "text",
+          "text": "に会ったことはない。"
+        }
+      ],
+      "acceptedJapanese": [],
+      "translationRevision": 1,
+      "status": "active",
+      "createdAt": "2026-09-01T16:42:45.050Z",
+      "updatedAt": "2026-09-01T16:42:45.050Z"
+    },
+    {
+      "id": "295aa8b3-9705-40d6-b26f-962af92021d6",
+      "japanese": "彼らが昨日面接した女性はその職を与えられた。",
+      "english": "The woman whom they interviewed yesterday has been given the job.",
+      "segments": [
+        {
+          "kind": "text",
+          "text": "彼らが昨日"
+        },
+        {
+          "kind": "word",
+          "id": "ed7aa8c2-fec8-44a9-8940-530cda230cbe",
+          "revision": 1,
+          "surface": "面接",
+          "reading": "めんせつ"
+        },
+        {
+          "kind": "text",
+          "text": "した女性はその"
+        },
+        {
+          "kind": "word",
+          "id": "6e7070b8-c685-4964-9163-ed0787f76134",
+          "revision": 1,
+          "surface": "職",
+          "reading": "しょく"
+        },
+        {
+          "kind": "text",
+          "text": "を"
+        },
+        {
+          "kind": "word",
+          "id": "f0dc1125-f787-4608-a3dd-687d02b28f7c",
+          "revision": 1,
+          "surface": "与",
+          "reading": "あた"
+        },
+        {
+          "kind": "text",
+          "text": "えられた。"
+        }
+      ],
+      "acceptedJapanese": [],
+      "translationRevision": 1,
+      "status": "active",
+      "createdAt": "2026-09-01T18:41:17.793Z",
+      "updatedAt": "2026-09-01T18:41:17.793Z"
     }
   ]
 }
