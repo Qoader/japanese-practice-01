@@ -220,6 +220,131 @@
       "status": "active",
       "createdAt": "2026-09-01T18:41:17.793Z",
       "updatedAt": "2026-09-01T18:41:17.793Z"
+    },
+    {
+      "id": "26ec7ea5-a51f-4da0-85eb-663930467888",
+      "japanese": "コーヒーが胃に悪い影響を与えることがあります。",
+      "english": "Coffee may have a bad effect on the stomach.",
+      "segments": [
+        {
+          "kind": "text",
+          "text": "コーヒーが"
+        },
+        {
+          "kind": "word",
+          "id": "efd4af33-8604-4ed6-9141-330f055e7bc3",
+          "revision": 1,
+          "surface": "胃",
+          "reading": "い"
+        },
+        {
+          "kind": "text",
+          "text": "に悪い"
+        },
+        {
+          "kind": "word",
+          "id": "caf11af6-af81-4dbe-b888-c50a5dd01705",
+          "revision": 1,
+          "surface": "影響",
+          "reading": "えいきょう"
+        },
+        {
+          "kind": "text",
+          "text": "を"
+        },
+        {
+          "kind": "word",
+          "id": "e0c790ad-7130-4d2c-9e98-7bf236738367",
+          "revision": 1,
+          "surface": "与",
+          "reading": "あた"
+        },
+        {
+          "kind": "text",
+          "text": "えることがあります。"
+        }
+      ],
+      "acceptedJapanese": [],
+      "translationRevision": 1,
+      "status": "active",
+      "createdAt": "2026-09-01T20:52:39.071Z",
+      "updatedAt": "2026-09-01T20:52:39.071Z"
+    },
+    {
+      "id": "31446fc1-f759-47bf-aefb-7d7e90a621b8",
+      "japanese": "彼女は電車の中で老婦人のために席を詰めた。",
+      "english": "She made room for an old woman on the train.",
+      "segments": [
+        {
+          "kind": "text",
+          "text": "彼女は電車の中で"
+        },
+        {
+          "kind": "word",
+          "id": "4c0635d8-32a1-4d2b-a0e2-48d59875198c",
+          "revision": 1,
+          "surface": "老婦人",
+          "reading": "ろうふじん"
+        },
+        {
+          "kind": "text",
+          "text": "のために席を"
+        },
+        {
+          "kind": "word",
+          "id": "8966fe09-5454-4421-a981-84612d69f96a",
+          "revision": 1,
+          "surface": "詰",
+          "reading": "つ"
+        },
+        {
+          "kind": "text",
+          "text": "めた。"
+        }
+      ],
+      "acceptedJapanese": [],
+      "translationRevision": 1,
+      "status": "active",
+      "createdAt": "2026-09-01T20:55:45.574Z",
+      "updatedAt": "2026-09-01T20:55:45.574Z"
+    },
+    {
+      "id": "4c22c2e5-d41f-4bd1-9c8a-ec564ae8a202",
+      "japanese": "彼は瓶に水を詰めた。",
+      "english": "He filled the bottle with water.",
+      "segments": [
+        {
+          "kind": "text",
+          "text": "彼は"
+        },
+        {
+          "kind": "word",
+          "id": "e0870bf3-8822-47f8-bea9-3a809e890d23",
+          "revision": 1,
+          "surface": "瓶",
+          "reading": "びん"
+        },
+        {
+          "kind": "text",
+          "text": "に水を"
+        },
+        {
+          "kind": "word",
+          "id": "bc2df460-7175-4eeb-b336-abd9350969ab",
+          "revision": 1,
+          "surface": "詰",
+          "reading": "つ"
+        },
+        {
+          "kind": "text",
+          "text": "めた。"
+        }
+      ],
+      "acceptedJapanese": [],
+      "translationRevision": 1,
+      "status": "active",
+      "createdAt": "2026-09-01T20:57:57.922Z",
+      "updatedAt": "2026-09-01T20:57:57.922Z"
     }
   ]
 }
