@@ -837,112 +837,131 @@ function Author({
       {step === 1 && (
         <>
           <p className="sentence-preview">{j}</p>
-          {words.map((w, i) => (
-            <label key={w.id}>
-              <input
-                type="checkbox"
-                checked={w.selected}
-                onChange={() =>
-                  setWords((xs) =>
-                    xs.map((x, n) =>
-                      n === i ? { ...x, selected: !x.selected } : x,
-                    ),
-                  )
-                }
-              />{' '}
+          {words.length > 0 && (
+            <div className="practice-word-list">
+              {words.map((w, i) => (
+                <div className="practice-word-row" key={w.id}>
+                  <div className="practice-word-main">
+                    <input
+                      type="checkbox"
+                      aria-label={`Select word ${i + 1}: ${w.surface}`}
+                      checked={w.selected}
+                      onChange={() =>
+                        setWords((xs) =>
+                          xs.map((x, n) =>
+                            n === i ? { ...x, selected: !x.selected } : x,
+                          ),
+                        )
+                      }
+                    />
+                    <input
+                      lang="ja"
+                      aria-label={`Word ${i + 1}`}
+                      value={w.surface}
+                      onChange={(x) => {
+                        const surface = x.target.value,
+                          text = graphemeClusters(j.trim()).join(''),
+                          starts: number[] = [];
+                        let from = 0,
+                          at;
+                        while ((at = text.indexOf(surface, from)) >= 0) {
+                          starts.push(at);
+                          from = at + 1;
+                        }
+                        if (starts.length === 1) remapWord(i, surface);
+                        else setPendingEdit({ index: i, surface, starts });
+                      }}
+                    />
+                    <span className="practice-word-range">
+                      ({w.start + 1}–{w.end})
+                    </span>
+                  </div>
+                  {pendingEdit?.index === i &&
+                    pendingEdit.starts.length > 1 && (
+                      <div className="practice-word-occurrences">
+                        <span>Choose occurrence:</span>
+                        <div className="practice-word-occurrence-buttons">
+                          {pendingEdit.starts.map((_, n) => (
+                            <button
+                              type="button"
+                              key={n}
+                              onClick={() =>
+                                remapWord(i, pendingEdit.surface, n)
+                              }
+                            >
+                              Occurrence {n + 1}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                </div>
+              ))}
+            </div>
+          )}
+          <div
+            className={`practice-word-add${words.length ? ' practice-word-add-spaced' : ''}`}
+          >
+            <label>
+              Add word occurrence
               <input
                 lang="ja"
-                aria-label={`Word ${i + 1}`}
-                value={w.surface}
-                onChange={(x) => {
-                  const surface = x.target.value,
-                    text = graphemeClusters(j.trim()).join(''),
-                    starts: number[] = [];
-                  let from = 0,
-                    at;
-                  while ((at = text.indexOf(surface, from)) >= 0) {
-                    starts.push(at);
-                    from = at + 1;
-                  }
-                  if (starts.length === 1) remapWord(i, surface);
-                  else setPendingEdit({ index: i, surface, starts });
-                }}
-              />{' '}
-              ({w.start + 1}–{w.end})
-              {pendingEdit?.index === i && pendingEdit.starts.length > 1 && (
-                <span>
-                  Choose occurrence:{' '}
-                  {pendingEdit.starts.map((_, n) => (
-                    <button
-                      type="button"
-                      key={n}
-                      onClick={() => remapWord(i, pendingEdit.surface, n)}
-                    >
-                      Occurrence {n + 1}
-                    </button>
-                  ))}
-                </span>
-              )}
+                value={addWord}
+                onChange={(x) => setAddWord(x.target.value)}
+              />
             </label>
-          ))}
-          <label>
-            Add word occurrence
-            <input
-              lang="ja"
-              value={addWord}
-              onChange={(x) => setAddWord(x.target.value)}
-            />
-          </label>
-          {addWord &&
-            graphemeClusters(j).join('').split(addWord).length > 1 && (
-              <p>Choose an occurrence:</p>
-            )}
-          {addWord &&
-            Array.from(
-              {
-                length: Math.max(
-                  0,
-                  graphemeClusters(j).join('').split(addWord).length - 1,
+            {addWord &&
+              graphemeClusters(j).join('').split(addWord).length > 1 && (
+                <p>Choose an occurrence:</p>
+              )}
+            {addWord &&
+              Array.from(
+                {
+                  length: Math.max(
+                    0,
+                    graphemeClusters(j).join('').split(addWord).length - 1,
+                  ),
+                },
+                (_, occurrence) => (
+                  <button
+                    type="button"
+                    key={occurrence}
+                    onClick={() => {
+                      const text = graphemeClusters(j).join(''),
+                        starts: number[] = [];
+                      let from = 0,
+                        at;
+                      while ((at = text.indexOf(addWord, from)) >= 0) {
+                        starts.push(at);
+                        from = at + 1;
+                      }
+                      const charAt = starts[occurrence],
+                        start = graphemeClusters(text.slice(0, charAt)).length,
+                        end = start + graphemeClusters(addWord).length;
+                      if (words.some((w) => w.start === start && w.end === end))
+                        return setError('That occurrence is already selected');
+                      setWords((xs) => [
+                        ...xs,
+                        {
+                          id: crypto.randomUUID(),
+                          start,
+                          end,
+                          surface: addWord,
+                          reading: '',
+                          selected: true,
+                        },
+                      ]);
+                      setAddWord('');
+                    }}
+                  >
+                    Occurrence {occurrence + 1}
+                  </button>
                 ),
-              },
-              (_, occurrence) => (
-                <button
-                  key={occurrence}
-                  onClick={() => {
-                    const text = graphemeClusters(j).join(''),
-                      starts: number[] = [];
-                    let from = 0,
-                      at;
-                    while ((at = text.indexOf(addWord, from)) >= 0) {
-                      starts.push(at);
-                      from = at + 1;
-                    }
-                    const charAt = starts[occurrence],
-                      start = graphemeClusters(text.slice(0, charAt)).length,
-                      end = start + graphemeClusters(addWord).length;
-                    if (words.some((w) => w.start === start && w.end === end))
-                      return setError('That occurrence is already selected');
-                    setWords((xs) => [
-                      ...xs,
-                      {
-                        id: crypto.randomUUID(),
-                        start,
-                        end,
-                        surface: addWord,
-                        reading: '',
-                        selected: true,
-                      },
-                    ]);
-                    setAddWord('');
-                  }}
-                >
-                  Occurrence {occurrence + 1}
-                </button>
-              ),
+              )}
+            {addWord && !graphemeClusters(j).join('').includes(addWord) && (
+              <p role="alert">No exact occurrence found in this sentence.</p>
             )}
-          {addWord && !graphemeClusters(j).join('').includes(addWord) && (
-            <p role="alert">No exact occurrence found in this sentence.</p>
-          )}
+          </div>
         </>
       )}
       {step >= 2 && step < 2 + selected.length && (

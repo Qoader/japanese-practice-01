@@ -133,6 +133,73 @@ article span {
   flex: 0 0 auto;
   margin-top: 0.25rem;
 }
+.practice-word-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+  min-width: 0;
+}
+.practice-word-row {
+  min-width: 0;
+}
+.practice-word-main {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  min-width: 0;
+}
+.practice-word-main > input[type='checkbox'] {
+  flex: 0 0 auto;
+}
+.practice-word-main > input:not([type='checkbox']) {
+  flex: 1 1 12rem;
+  min-width: 0;
+  width: 1rem;
+  padding: 0.65rem;
+  border: 1px solid #bba99a;
+  border-radius: 0.5rem;
+  background: white;
+}
+.practice-word-range {
+  flex: 0 0 auto;
+  white-space: nowrap;
+}
+.practice-word-occurrences {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  width: 100%;
+  margin-top: 0.25rem;
+}
+.practice-word-occurrence-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+.practice-word-occurrence-buttons button,
+.practice-word-add > button {
+  margin: 0;
+}
+.practice-word-add-spaced {
+  margin-top: 1.25rem;
+}
+.practice-word-add label {
+  display: block;
+}
+.practice-word-add label input {
+  display: block;
+  width: 100%;
+  margin-top: 0.5rem;
+  padding: 0.65rem;
+  border: 1px solid #bba99a;
+  border-radius: 0.5rem;
+  background: white;
+}
+.practice-word-add p {
+  margin-bottom: 0.5rem;
+}
 .eyebrow {
   color: #9f2e1d;
   font-weight: 700;
