@@ -200,6 +200,7 @@ function App() {
         <a href="#/lesson/setup">Practice</a>
         <a href="#/sentences">Sentences</a>
         <a href="#/progress">Progress</a>
+        <a href="#/sync">Sync{q.length ? ` (${q.length})` : ''}</a>
         <a href="#/settings">Settings</a>
       </nav>
     </>
