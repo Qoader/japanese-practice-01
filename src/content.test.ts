@@ -7,7 +7,34 @@ import {
   segmentsFromAuthorWords,
   validateAuthorWords,
   reviseSentence,
+  cardsForLesson,
+  parseLessonConfig,
 } from './content';
+
+const sentence = (
+  id: string,
+  japanese: string,
+  english = 'translation',
+): any => ({
+  id,
+  japanese,
+  english,
+  segments: [
+    {
+      kind: 'word',
+      id: `${id}-word`,
+      revision: 1,
+      surface: '勉強',
+      reading: 'べんきょう',
+    },
+    { kind: 'text', text: 'します' },
+  ],
+  acceptedJapanese: [],
+  translationRevision: 1,
+  status: 'active',
+  createdAt: 'x',
+  updatedAt: 'x',
+});
 
 describe('content rules', () => {
   it('normalizes katakana readings and whitespace', () =>
@@ -114,4 +141,59 @@ describe('content rules', () => {
         ],
       }),
     ).toThrow());
+  it('filters sentence lessons by Japanese text only and includes duplicate records', () => {
+    const records = [
+      sentence('a', '勉強します', 'study'),
+      sentence('b', '勉強します', 'learn'),
+      sentence('c', '読みます', 'study'),
+    ];
+    const config = {
+      selectionMode: 'sentences' as const,
+      query: 'study',
+      selectedWords: [],
+      selectedSentences: [],
+      types: { reading: true, kanji: true, translation: true },
+    };
+    expect(cardsForLesson(records, config)).toEqual([]);
+    expect(
+      cardsForLesson(records, {
+        ...config,
+        query: '勉強',
+        selectedSentences: ['勉強します'],
+      }),
+    ).toHaveLength(6);
+  });
+  it('uses all Japanese matches when sentence selection is empty and honors type subsets', () => {
+    const records = [sentence('a', '勉強します'), sentence('b', '読みます')];
+    const config = {
+      selectionMode: 'sentences' as const,
+      query: 'ます',
+      selectedWords: [],
+      selectedSentences: [],
+      types: { reading: false, kanji: false, translation: true },
+    };
+    expect(cardsForLesson(records, config).map((card) => card.type)).toEqual([
+      'translation',
+      'translation',
+    ]);
+  });
+  it('parses legacy configs and safely rejects malformed configs', () => {
+    const legacy = parseLessonConfig(
+      JSON.stringify({
+        query: '勉',
+        selectedWords: ['key'],
+        types: { reading: true, kanji: false, translation: true },
+      }),
+    );
+    expect(legacy).toMatchObject({
+      selectionMode: 'vocabulary',
+      selectedSentences: [],
+    });
+    expect(parseLessonConfig('{not-json')).toBeUndefined();
+    expect(
+      parseLessonConfig(
+        JSON.stringify({ query: '', selectedWords: [], types: null }),
+      ),
+    ).toBeUndefined();
+  });
 });

@@ -12,6 +12,7 @@ import {
   chooseCard,
   sentenceParts,
   cardsForLesson,
+  parseLessonConfig,
   cardsForSentence,
   scheduleRetry,
   vocabularyEntries,
@@ -30,6 +31,7 @@ import type {
   PendingChange,
   PersonalVariant,
   RetryEntry,
+  LessonConfig,
 } from './types';
 import {
   loadDataset,
@@ -221,7 +223,7 @@ function Lesson({
   setV: React.Dispatch<React.SetStateAction<PersonalVariant[]>>;
   add: (x: PendingChange) => Promise<void>;
 }) {
-  let cfg = JSON.parse(sessionStorage.getItem('lesson-config') || 'null'),
+  let cfg = parseLessonConfig(sessionStorage.getItem('lesson-config')),
     cards = useMemo(() => cardsForLesson(s, cfg || undefined), [s, cfg]),
     [i, si] = useState(0),
     [recent, setRecent] = useState<string[]>([]),
@@ -468,7 +470,9 @@ function Lesson({
 }
 function Setup({ s }: { s: SentenceRecord[] }) {
   let [q, sq] = useState(''),
+    [mode, setMode] = useState<'vocabulary' | 'sentences'>('vocabulary'),
     [selected, setSelected] = useState<string[]>([]),
+    [selectedSentences, setSelectedSentences] = useState<string[]>([]),
     [t, st] = useState({ reading: true, kanji: true, translation: true }),
     f = s.filter(
       (x) =>
@@ -477,7 +481,17 @@ function Setup({ s }: { s: SentenceRecord[] }) {
         x.english.toLowerCase().includes(q.toLowerCase()),
     ),
     entries = vocabularyEntries(f),
-    n = cardsForLesson(f, {
+    sentenceTexts = [
+      ...new Set(
+        f.filter((x) => !q || x.japanese.includes(q)).map((x) => x.japanese),
+      ),
+    ],
+    visibleItems =
+      mode === 'vocabulary' ? entries.map((x) => x.key) : sentenceTexts,
+    activeSelected = mode === 'vocabulary' ? selected : selectedSentences,
+    n = cardsForLesson(s, {
+      selectionMode: mode,
+      selectedSentences,
       query: q,
       selectedWords: selected,
       types: t,
@@ -492,6 +506,27 @@ function Setup({ s }: { s: SentenceRecord[] }) {
         onChange={(e) => sq(e.target.value)}
       />
       <fieldset>
+        <legend>Lesson content</legend>
+        <label>
+          <input
+            type="radio"
+            name="selection-mode"
+            checked={mode === 'vocabulary'}
+            onChange={() => setMode('vocabulary')}
+          />
+          Vocabulary
+        </label>
+        <label>
+          <input
+            type="radio"
+            name="selection-mode"
+            checked={mode === 'sentences'}
+            onChange={() => setMode('sentences')}
+          />
+          Sentences
+        </label>
+      </fieldset>
+      <fieldset>
         {(['reading', 'kanji', 'translation'] as const).map((x) => (
           <label key={x}>
             <input
@@ -503,28 +538,73 @@ function Setup({ s }: { s: SentenceRecord[] }) {
           </label>
         ))}
       </fieldset>
-      <h2>Vocabulary</h2>
+      {mode === 'sentences' && (
+        <div className="lesson-actions">
+          <button
+            type="button"
+            onClick={() =>
+              setSelectedSentences((old) => [
+                ...new Set([...old, ...visibleItems]),
+              ])
+            }
+          >
+            Select all matching
+          </button>
+          <button
+            type="button"
+            onClick={() =>
+              setSelectedSentences((old) =>
+                old.filter((x) => !visibleItems.includes(x)),
+              )
+            }
+          >
+            Clear matching
+          </button>
+        </div>
+      )}
+      <h2>{mode === 'vocabulary' ? 'Vocabulary' : 'Sentences'}</h2>
       <p>
-        {selected.length ? `${selected.length} selected` : 'All vocabulary'}
+        {activeSelected.length
+          ? `${activeSelected.length} selected`
+          : mode === 'vocabulary'
+            ? 'All vocabulary'
+            : 'All sentences'}
       </p>
       <div className="vocabulary-list">
-        {entries.map((word) => (
-          <label key={word.key}>
-            <input
-              type="checkbox"
-              checked={selected.includes(word.key)}
-              onChange={(e) =>
-                setSelected((old) =>
-                  e.target.checked
-                    ? [...old, word.key]
-                    : old.filter((x) => x !== word.key),
-                )
-              }
-            />
-            {word.surface}（{word.reading}） · {word.sentenceIds.length}{' '}
-            sentences
-          </label>
-        ))}
+        {mode === 'vocabulary'
+          ? entries.map((word) => (
+              <label key={word.key}>
+                <input
+                  type="checkbox"
+                  checked={selected.includes(word.key)}
+                  onChange={(e) =>
+                    setSelected((old) =>
+                      e.target.checked
+                        ? [...old, word.key]
+                        : old.filter((x) => x !== word.key),
+                    )
+                  }
+                />
+                {word.surface}（{word.reading}） · {word.sentenceIds.length}{' '}
+                sentences
+              </label>
+            ))
+          : sentenceTexts.map((text) => (
+              <label key={text}>
+                <input
+                  type="checkbox"
+                  checked={selectedSentences.includes(text)}
+                  onChange={(e) =>
+                    setSelectedSentences((old) =>
+                      e.target.checked
+                        ? [...old, text]
+                        : old.filter((x) => x !== text),
+                    )
+                  }
+                />
+                {text}
+              </label>
+            ))}
       </div>
       {n ? (
         <button
@@ -532,7 +612,14 @@ function Setup({ s }: { s: SentenceRecord[] }) {
           onClick={() => {
             sessionStorage.setItem(
               'lesson-config',
-              JSON.stringify({ query: q, selectedWords: selected, types: t }),
+              JSON.stringify({
+                selectionMode: mode,
+                query: q,
+                selectedWords: selected,
+                selectedSentences,
+                count: n,
+                types: t,
+              } satisfies LessonConfig),
             );
             location.hash = '#/lesson';
           }}

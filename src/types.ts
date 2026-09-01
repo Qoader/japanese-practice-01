@@ -76,8 +76,10 @@ export interface RetryEntry {
   dueAt: number;
 }
 export interface LessonConfig {
+  selectionMode: 'vocabulary' | 'sentences';
   query: string;
   selectedWords: string[];
-  count: number;
+  selectedSentences: string[];
+  count?: number;
   types: { reading: boolean; kanji: boolean; translation: boolean };
 }

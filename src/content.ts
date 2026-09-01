@@ -321,35 +321,77 @@ export function validateAuthorWords(
 }
 export function cardsForLesson(
   sentences: SentenceRecord[],
-  config?: {
-    query?: string;
-    selectedWords?: string[];
-    types?: { reading: boolean; kanji: boolean; translation: boolean };
-  },
+  config?: import('./types').LessonConfig,
 ) {
-  const all = sentences.flatMap(cardsForSentence);
+  const all = sentences
+    .filter((sentence) => sentence.status !== 'archived')
+    .flatMap(cardsForSentence);
   if (!config) return all;
   const query = (config.query || '').toLocaleLowerCase();
   const selected = new Set(config.selectedWords || []);
+  const selectedSentences = new Set(config.selectedSentences || []);
   return all.filter((card) => {
     const sentenceMatch =
       !query ||
-      card.sentence.japanese.includes(config.query || '') ||
-      card.sentence.english.toLocaleLowerCase().includes(query);
-    const vocabMatch =
-      !selected.size ||
-      (card.word &&
-        selected.has(vocabularyKey(card.word.surface, card.word.reading))) ||
-      (card.type === 'translation' &&
-        card.sentence.segments.some(
-          (x) =>
-            x.kind === 'word' &&
-            selected.has(vocabularyKey(x.surface, x.reading)),
-        ));
+      (config.selectionMode === 'sentences'
+        ? card.sentence.japanese.includes(config.query || '')
+        : card.sentence.japanese.includes(config.query || '') ||
+          card.sentence.english.toLocaleLowerCase().includes(query));
+    const itemMatch =
+      config.selectionMode === 'sentences'
+        ? !selectedSentences.size ||
+          selectedSentences.has(card.sentence.japanese)
+        : !selected.size ||
+          (card.word &&
+            selected.has(
+              vocabularyKey(card.word.surface, card.word.reading),
+            )) ||
+          (card.type === 'translation' &&
+            card.sentence.segments.some(
+              (x) =>
+                x.kind === 'word' &&
+                selected.has(vocabularyKey(x.surface, x.reading)),
+            ));
     return (
-      sentenceMatch && vocabMatch && (!config.types || config.types[card.type])
+      sentenceMatch && itemMatch && (!config.types || config.types[card.type])
     );
   });
+}
+
+/** Safely load a lesson config, including legacy vocabulary-only configs. */
+export function parseLessonConfig(
+  value: string | null,
+): import('./types').LessonConfig | undefined {
+  if (!value) return undefined;
+  try {
+    const raw = JSON.parse(value) as Partial<import('./types').LessonConfig>;
+    if (!raw || typeof raw !== 'object') return undefined;
+    const mode = raw.selectionMode === 'sentences' ? 'sentences' : 'vocabulary';
+    const types = raw.types;
+    if (!types || typeof types !== 'object') return undefined;
+    if (typeof raw.query !== 'string' || !Array.isArray(raw.selectedWords))
+      return undefined;
+    return {
+      selectionMode: mode,
+      query: raw.query,
+      selectedWords: raw.selectedWords.filter(
+        (x): x is string => typeof x === 'string',
+      ),
+      selectedSentences: Array.isArray(raw.selectedSentences)
+        ? raw.selectedSentences.filter(
+            (x): x is string => typeof x === 'string',
+          )
+        : [],
+      count: typeof raw.count === 'number' ? raw.count : undefined,
+      types: {
+        reading: types.reading === true,
+        kanji: types.kanji === true,
+        translation: types.translation === true,
+      },
+    };
+  } catch {
+    return undefined;
+  }
 }
 /** Schedule a single miss after 3–6 intervening cards, preserving an earlier due slot. */
 export function scheduleRetry(
