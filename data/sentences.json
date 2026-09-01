@@ -1,1 +1,142 @@
-{"schemaVersion":1,"sentences":[{"id":"seed-1","japanese":"日本語を勉強します。","english":"I study Japanese.","segments":[{"kind":"word","id":"seed-word-1","revision":1,"surface":"日本語","reading":"にほんご"},{"kind":"text","text":"を"},{"kind":"word","id":"seed-word-2","revision":1,"surface":"勉強します","reading":"べんきょうします"},{"kind":"text","text":"。"}],"acceptedJapanese":[],"translationRevision":1,"status":"active","createdAt":"2026-01-01T00:00:00.000Z","updatedAt":"2026-01-01T00:00:00.000Z"}]}
+{
+  "schemaVersion": 1,
+  "sentences": [
+    {
+      "id": "seed-1",
+      "japanese": "日本語を勉強します。",
+      "english": "I study Japanese.",
+      "segments": [
+        {
+          "kind": "word",
+          "id": "seed-word-1",
+          "revision": 1,
+          "surface": "日本語",
+          "reading": "にほんご"
+        },
+        {
+          "kind": "text",
+          "text": "を"
+        },
+        {
+          "kind": "word",
+          "id": "seed-word-2",
+          "revision": 1,
+          "surface": "勉強します",
+          "reading": "べんきょうします"
+        },
+        {
+          "kind": "text",
+          "text": "。"
+        }
+      ],
+      "acceptedJapanese": [],
+      "translationRevision": 1,
+      "status": "active",
+      "createdAt": "2026-01-01T00:00:00.000Z",
+      "updatedAt": "2026-01-01T00:00:00.000Z"
+    },
+    {
+      "id": "36839530-e17e-46b6-ad72-5e76a8e6d94e",
+      "japanese": "上司は私の遅刻を許してくれた。",
+      "english": "My superior excused me for arriving late.",
+      "segments": [
+        {
+          "kind": "word",
+          "id": "639047fe-df3c-4b2f-a47d-cbf54765d8c6",
+          "revision": 1,
+          "surface": "上司",
+          "reading": "じょうし"
+        },
+        {
+          "kind": "text",
+          "text": "は私の"
+        },
+        {
+          "kind": "word",
+          "id": "71e06f58-2d4c-40ff-9b7f-75a263eb46f8",
+          "revision": 1,
+          "surface": "遅刻",
+          "reading": "ちこく"
+        },
+        {
+          "kind": "text",
+          "text": "を"
+        },
+        {
+          "kind": "word",
+          "id": "598ce359-7670-475c-9846-8b5688a1e8b7",
+          "revision": 1,
+          "surface": "許",
+          "reading": "ゆる"
+        },
+        {
+          "kind": "text",
+          "text": "してくれた。"
+        }
+      ],
+      "acceptedJapanese": [
+        {
+          "id": "5748c4bb-514d-4347-ae1d-745c692e1b0c",
+          "text": "上司は私の遅刻を許してくれました",
+          "createdAt": "2026-08-31T18:43:06.582Z"
+        }
+      ],
+      "translationRevision": 1,
+      "status": "active",
+      "createdAt": "2026-08-31T18:42:16.868Z",
+      "updatedAt": "2026-08-31T18:42:16.868Z"
+    },
+    {
+      "id": "685478d3-a93f-45a1-b0b4-1f6549dd8d51",
+      "japanese": "犯罪者は社会的権利を奪われている。",
+      "english": "Criminals are deprived of social rights.",
+      "segments": [
+        {
+          "kind": "word",
+          "id": "1e735ee1-4534-4e8f-b046-8a9bbd347aea",
+          "revision": 1,
+          "surface": "犯罪者",
+          "reading": "はんざいしゃ"
+        },
+        {
+          "kind": "text",
+          "text": "は"
+        },
+        {
+          "kind": "word",
+          "id": "f9afe9f9-0c94-43f5-8e83-5b091da5d0c2",
+          "revision": 1,
+          "surface": "社会的",
+          "reading": "しゃかいてき"
+        },
+        {
+          "kind": "word",
+          "id": "377c52df-b0c2-41db-89fb-8c0c4a2fcaf2",
+          "revision": 1,
+          "surface": "権利",
+          "reading": "けんり"
+        },
+        {
+          "kind": "text",
+          "text": "を"
+        },
+        {
+          "kind": "word",
+          "id": "a7550f88-9820-4606-b7e8-cf354f793643",
+          "revision": 1,
+          "surface": "奪",
+          "reading": "うば"
+        },
+        {
+          "kind": "text",
+          "text": "われている。"
+        }
+      ],
+      "acceptedJapanese": [],
+      "translationRevision": 1,
+      "status": "active",
+      "createdAt": "2026-09-01T05:51:39.243Z",
+      "updatedAt": "2026-09-01T05:51:39.243Z"
+    }
+  ]
+}
